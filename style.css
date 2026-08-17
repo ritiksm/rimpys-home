@@ -162,15 +162,9 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
   background: var(--schwarz);
   overflow: hidden;
 }
-.hero .slides { list-style: none; margin: 0; padding: 0; height: 100%; }
-.hero .slide {
+.hero-video {
   position: absolute;
   inset: 0;
-  opacity: 0;
-  transition: opacity 1.4s var(--ease);
-}
-.hero .slide.active { opacity: 1; }
-.hero .slide img {
   width: 100%; height: 100%;
   object-fit: cover;
   opacity: 0.62;
@@ -200,35 +194,6 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .hero-title .subtitle { font-size: 20px; opacity: 0.92; margin-top: 14px; }
 
-.slide-dots {
-  position: absolute;
-  left: 0; right: 0; bottom: 34px;
-  z-index: 5;
-  display: flex;
-  justify-content: center;
-  gap: 9px;
-  list-style: none;
-  margin: 0; padding: 0;
-}
-/* Der Punkt bleibt 6px, die Tippflaeche darum ist 44px gross. */
-.slide-dots button {
-  display: block;
-  width: 44px; height: 44px;
-  border-radius: 50%;
-  background: none;
-  position: relative;
-}
-.slide-dots button::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.45);
-  transition: background 0.4s var(--ease);
-}
-.slide-dots button[aria-current="true"]::after { background: var(--weiss); }
 
 /* --- Bloecke ------------------------------------------------------------- */
 
