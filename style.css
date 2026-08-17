@@ -1,0 +1,499 @@
+/* Rimpy's Home. Layout und Typografie folgen der Vorlage studioilse.com:
+   fester 100px-Kopf, 100vh-Hero, Videoblock mit 65vh, Bildpaare 50/50 mit
+   50px Innenabstand, Aufblenden beim Scrollen aus 30px, Grossansicht als
+   ruhiges #fafafa-Overlay. Die Hausschrift der Vorlage (Cerebri Sans) ist
+   lizenzpflichtig, hier steht Hanken Grotesk Light an ihrer Stelle. Die
+   Titelschrift Baskervville ist dieselbe wie dort. */
+
+:root {
+  --schwarz: #000;
+  --weiss: #fff;
+  --overlay: #fafafa;
+  --grau: #767676;
+  --rand: 50px;
+  --block: 50px;
+  /* Die Vorlage faehrt jede Bewegung mit derselben Kurve und Dauer. */
+  --ease: ease-out;
+  --breite: 2000px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* Safari faerbt sonst jede Beruehrung grau. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--weiss);
+  color: var(--schwarz);
+  font-family: 'Hanken Grotesk', -apple-system, Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+a, a:visited { color: inherit; text-decoration: none; outline: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+.title {
+  display: block;
+  font-family: 'Baskervville', Georgia, serif;
+  font-weight: 400;
+  font-size: 45px;
+  line-height: 1.15;
+  letter-spacing: 0;
+}
+
+.subtitle {
+  display: block;
+  margin-top: 10px;
+  font-family: 'Baskervville', Georgia, serif;
+  font-size: 25px;
+  line-height: 1.3;
+}
+
+/* --- Kopf ---------------------------------------------------------------- */
+
+.header {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: env(safe-area-inset-top) max(25px, env(safe-area-inset-right)) 0
+           max(25px, env(safe-area-inset-left));
+  mix-blend-mode: difference;
+  transition: top 0.6s var(--ease);
+}
+
+.scrolled .header { top: -100px; }
+.menu-open .header { top: 0; }
+
+/* Wie in der Vorlage: auf breiten Schirmen steht die Wortmarke mittig, ab
+   1030px abwaerts rutscht sie nach links. */
+.header .logo {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 14px;      /* Tippflaeche auf 44px Hoehe */
+  font-family: 'Hanken Grotesk', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--weiss);
+}
+
+/* Die sichtbaren Striche bleiben 25px breit, die Tippflaeche darum herum ist
+   44px hoch und breit, wie es fuer Finger noetig ist. */
+.menu-icon {
+  width: 44px; height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+}
+.menu-icon span {
+  display: block;
+  width: 25px;
+  height: 1px;
+  background: var(--weiss);
+  transition: all 0.6s var(--ease);
+}
+.menu-icon span:nth-child(2) { margin: 5px auto; }
+
+/* --- Menue --------------------------------------------------------------- */
+
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0.6s var(--ease);
+}
+.menu-open .menu-overlay { opacity: 1; visibility: visible; }
+
+.menu-overlay ul { list-style: none; margin: 0; padding: 0; text-align: center; }
+.menu-overlay li { margin: 0.2em 0; }
+.menu-overlay a {
+  display: inline-block;
+  padding: 10px 16px;      /* macht jeden Eintrag mindestens 44px hoch */
+  font-family: 'Baskervville', Georgia, serif;
+  font-size: 32px;
+  transition: opacity 0.4s var(--ease);
+}
+.menu-overlay a:hover { opacity: 0.5; }
+
+.close-overlay {
+  position: absolute;
+  top: calc(22px + env(safe-area-inset-top));
+  right: 22px;
+  z-index: 10;
+  width: 44px; height: 44px;
+  font-size: 34px;
+  line-height: 1;
+  font-weight: 300;
+  transition: opacity 0.4s var(--ease);
+}
+.close-overlay:hover { opacity: 0.5; }
+
+/* --- Hero ---------------------------------------------------------------- */
+
+.fullbleed-image.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  /* In Safari auf dem iPhone waechst und schrumpft 100vh mit der Adressleiste,
+     das Bild springt beim Scrollen. svh ist die kleine, stabile Hoehe. */
+  height: 100svh;
+  background: var(--schwarz);
+  overflow: hidden;
+}
+.hero .slides { list-style: none; margin: 0; padding: 0; height: 100%; }
+.hero .slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.4s var(--ease);
+}
+.hero .slide.active { opacity: 1; }
+.hero .slide img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.62;
+}
+/* Die Vorlage kommt mit reiner Abdunklung aus, weil ihre Bilder dunkel sind.
+   Diese Innenaufnahmen sind hell, deshalb zusaetzlich ein weicher Verlauf
+   hinter der Schrift. */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(ellipse at center,
+              rgba(0, 0, 0, 0.34) 0%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0.3) 100%);
+  pointer-events: none;
+}
+.hero-title {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 900px;
+  padding: 0 var(--rand);
+  text-align: center;
+  color: var(--weiss);
+  z-index: 5;
+}
+.hero-title .subtitle { font-size: 20px; opacity: 0.92; margin-top: 14px; }
+
+.slide-dots {
+  position: absolute;
+  left: 0; right: 0; bottom: 34px;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  list-style: none;
+  margin: 0; padding: 0;
+}
+/* Der Punkt bleibt 6px, die Tippflaeche darum ist 44px gross. */
+.slide-dots button {
+  display: block;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: none;
+  position: relative;
+}
+.slide-dots button::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  transition: background 0.4s var(--ease);
+}
+.slide-dots button[aria-current="true"]::after { background: var(--weiss); }
+
+/* --- Bloecke ------------------------------------------------------------- */
+
+/* Wie in der Vorlage laeuft der Inhalt bis 2000px mit und zentriert sich
+   danach, statt auf sehr breiten Schirmen weiter auseinanderzulaufen. */
+.page-container { max-width: var(--breite); margin: 0 auto; }
+
+.homepage-block { position: relative; display: block; margin-bottom: var(--block); }
+
+.lead, .closing { padding: 12vh var(--rand); }
+.closing { padding-bottom: 6vh; }
+.lead-text {
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 19px;
+  line-height: 1.75;
+  text-align: center;
+}
+.closing .lead-text { font-size: 15px; color: var(--grau); max-width: 620px; }
+
+/* --- Video --------------------------------------------------------------- */
+
+/* Wie in der Vorlage steht der Videoblock nicht randlos, sondern mit dem
+   gleichen Rand wie die Bildspalten. */
+.video-block { padding: 0 var(--rand); }
+
+.video-container {
+  position: relative;
+  width: 100%;
+  padding-top: 65vh;
+  overflow: hidden;
+  background: var(--schwarz);
+}
+.video-container .cover-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.18);
+  transition: opacity 0.6s var(--ease), visibility 0.6s var(--ease);
+}
+.video-container .cover-overlay img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+}
+.video-container.play .cover-overlay { opacity: 0; visibility: hidden; }
+
+.video-info {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 900px;
+  padding: 0 var(--rand);
+  text-align: center;
+  color: var(--weiss);
+  z-index: 50;
+}
+.video-info .subtitle { font-size: 21px; }
+
+.video-button {
+  display: block;
+  margin: 30px auto 0;
+  width: 60px; height: 60px;
+  border: 1px solid var(--weiss);
+  border-radius: 1000px;
+  position: relative;
+  transition: opacity 0.6s var(--ease);
+}
+.video-button:hover { opacity: 0.7; }
+.video-button svg { width: 40px; height: 40px; fill: var(--weiss); position: absolute; top: 9px; left: 12px; }
+
+.video-pending {
+  display: block;
+  margin-top: 26px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.video-frame { position: absolute; inset: 0; cursor: zoom-in; }
+.video-frame video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+
+/* Die Fassung innerhalb eines Kapitels ist flacher als der grosse Block oben
+   und traegt denselben Rand wie die Bildspalten. */
+.video-block.klein { margin-top: 10px; }
+.video-block.klein .video-container { padding-top: 46vh; }
+.video-block.klein .title { font-size: 34px; }
+.video-block.klein .subtitle { font-size: 18px; }
+
+/* --- Kapitel ------------------------------------------------------------- */
+
+/* Kapitelkopf linksbuendig in einer schmalen Spalte, wie die Kachelkoepfe der
+   Vorlage, nicht mittig. */
+.chapter { padding-top: 10vh; }
+.chapter-head {
+  margin: 0;
+  padding: 0 var(--rand);
+  text-align: left;
+}
+.chapter-head .title { margin: 0; font-size: 52px; }
+.chapter-intro { margin: 16px 0 0; max-width: 30em; color: var(--grau); font-size: 15px; }
+
+/* --- Bildpaare ----------------------------------------------------------- */
+
+.inline-container {
+  font-size: 0;
+  position: relative;
+  margin: var(--block) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.inline {
+  display: inline-block;
+  vertical-align: top;
+  padding: 0 var(--rand);
+  margin-bottom: 90px;
+  font-size: 16px;
+}
+.inline.col50 { width: 50%; }
+.inline.col100 { width: 100%; }
+/* Jede zweite halbe Spalte laeuft tiefer, das ergibt den versetzten Rhythmus
+   der Vorlage ohne Masonry-Bibliothek. */
+.inline.versetzt { margin-top: 130px; }
+
+figure { margin: 0; }
+
+.image-container {
+  display: block;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #f2f0ed;
+  cursor: zoom-in;
+}
+.image-container img { width: 100%; transition: transform 1.2s var(--ease); }
+/* Nur mit echtem Zeiger. Auf dem Telefon bleibt der Zoom sonst nach dem
+   Antippen haengen. */
+@media (hover: hover) and (pointer: fine) {
+  .image-container:hover img { transform: scale(1.02); }
+}
+
+figcaption { padding: 18px 2px 0; }
+.figure-title {
+  display: block;
+  font-family: 'Baskervville', Georgia, serif;
+  font-size: 22px;
+  line-height: 1.25;
+}
+.figure-sub { display: block; margin-top: 4px; color: var(--grau); font-size: 15px; }
+
+details { margin-top: 12px; }
+details summary {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+  padding-bottom: 2px;
+  transition: opacity 0.4s var(--ease);
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::after { content: ' +'; }
+details[open] summary::after { content: ' \2212'; }
+details summary:hover { opacity: 0.5; }
+details p { margin: 14px 0 0; max-width: 46em; font-size: 15px; color: #333; }
+
+/* --- Grossansicht -------------------------------------------------------- */
+
+.overlay-media {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease), visibility 0.6s var(--ease);
+}
+.overlay-open .overlay-media { opacity: 1; visibility: visible; }
+.overlay-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 70px 40px;
+}
+.overlay-inner img, .overlay-inner video, .overlay-inner iframe {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto; height: auto;
+  border: 0;
+}
+.overlay-caption {
+  position: absolute;
+  left: 0; right: 0; bottom: 26px;
+  text-align: center;
+  font-family: 'Baskervville', Georgia, serif;
+  font-size: 17px;
+}
+
+/* --- Aufblenden beim Scrollen -------------------------------------------- */
+
+.scrollAnimatedItem {
+  opacity: 0.2;
+  transform: translateY(30px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+.scrollAnimatedItem.inview { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollAnimatedItem { opacity: 1; transform: none; transition: none; }
+  .image-container img { transition: none; }
+}
+
+/* --- Fuss ---------------------------------------------------------------- */
+
+.footer {
+  padding: 8vh var(--rand) calc(10vh + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--grau);
+}
+
+/* --- Schmale Schirme ----------------------------------------------------- */
+
+@media only screen and (max-width: 1029px) {
+  :root { --rand: 25px; }
+  .title { font-size: 34px; }
+  .chapter-head .title { font-size: 38px; }
+  .subtitle { font-size: 21px; }
+  .inline { margin-bottom: 60px; }
+  .inline.versetzt { margin-top: 80px; }
+  .header { justify-content: space-between; }
+  .header .logo { position: static; transform: none; }
+}
+
+@media only screen and (max-width: 767px) {
+  .title { font-size: 28px; }
+  .subtitle, .hero-title .subtitle, .video-info .subtitle { font-size: 18px; }
+  .inline.col50, .inline.col100 { width: 100%; margin-bottom: 50px; }
+  .inline.versetzt { margin-top: 0; }
+  .chapter-head .title { font-size: 30px; }
+  .video-block { padding: 0; }
+  .video-container { padding-top: 56.3%; }
+  .lead, .closing { padding: 8vh var(--rand); }
+  .lead-text { font-size: 17px; }
+  .overlay-inner {
+    padding: calc(64px + env(safe-area-inset-top)) 16px
+             calc(52px + env(safe-area-inset-bottom));
+  }
+  .overlay-caption { bottom: calc(18px + env(safe-area-inset-bottom)); font-size: 15px; }
+  .figure-title { font-size: 20px; }
+  .figure-sub { font-size: 14px; }
+  details p { font-size: 14px; }
+  .chapter { padding-top: 6vh; }
+  .menu-overlay a { font-size: 26px; }
+}
