@@ -98,60 +98,26 @@
     if (ev.key === 'Escape') { overlayZu(); menuAuf(false); }
   });
 
-  /* --- Hero-Blende --------------------------------------------------------- */
+  var telefon = window.innerWidth < 768;
 
-  var slides = document.querySelectorAll('.hero .slide');
-  var punkte = document.querySelectorAll('.slide-dots button');
-  if (slides.length > 1) {
-    var aktiv = 0;
-    var uhr = null;
+  /* --- Kopfvideo ----------------------------------------------------------- */
 
-    // Nur das erste Hero-Bild steht im Dokument. Die uebrigen tragen ihre
-    // Quelle in data-Feldern und werden erst geladen, wenn sie an der Reihe
-    // sind. Ohne das zieht schon die erste Ansicht drei Vollbilder.
-    function lade(slide) {
-      if (!slide) { return; }
-      var img = slide.querySelector('img');
-      if (!img || !img.dataset.src) { return; }
-      img.srcset = img.dataset.srcset || '';
-      img.src = img.dataset.src;
-      delete img.dataset.src;
-    }
-
-    var bereit = false;   // wird erst nach der ersten Ansicht gesetzt
-
-    function zeige(i) {
-      aktiv = (i + slides.length) % slides.length;
-      lade(slides[aktiv]);
-      if (bereit) { lade(slides[(aktiv + 1) % slides.length]); }
-      slides.forEach(function (s, n) { s.classList.toggle('active', n === aktiv); });
-      punkte.forEach(function (p, n) {
-        p.setAttribute('aria-current', n === aktiv ? 'true' : 'false');
+  // Laeuft stumm in Schleife, auch auf dem Telefon: die kleine Fassung wiegt
+  // 1 MB, die grosse 2,6 MB. Wer Bewegung abgestellt hat, sieht das Standbild.
+  var kopf = document.querySelector('.hero-video');
+  if (kopf && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    kopf.src = telefon ? kopf.dataset.srcKlein : kopf.dataset.src;
+    var start = kopf.play();
+    if (start && start.catch) {
+      // Wenn ein Browser den Selbststart doch verweigert, bleibt das Standbild
+      // stehen, und ein Tippen startet ihn.
+      start.catch(function () {
+        kopf.addEventListener('click', function () { kopf.play(); }, { once: true });
       });
     }
-
-    function starte() {
-      clearInterval(uhr);
-      uhr = setInterval(function () { zeige(aktiv + 1); }, 6000);
-    }
-
-    punkte.forEach(function (p) {
-      p.addEventListener('click', function () {
-        zeige(parseInt(p.dataset.slide, 10));
-        starte();
-      });
-    });
-    zeige(0);
-    // Erst wenn die Seite steht, das zweite Hero-Bild nachladen.
-    setTimeout(function () { bereit = true; lade(slides[1]); }, 2500);
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) { starte(); }
-  } else if (punkte.length) {
-    punkte.forEach(function (p) { p.parentNode.parentNode.removeChild(p.parentNode); });
   }
 
-  /* --- Video -------------------------------------------------------------- */
-
-  var telefon = window.innerWidth < 768;
+  /* --- Videos -------------------------------------------------------------- */
 
   document.querySelectorAll('.video-container').forEach(function (block) {
     var video = block.querySelector('video');
@@ -172,10 +138,12 @@
       });
     }
 
-    // Auf dem Rechner laeuft das Video von selbst, sobald der Block ins Bild
-    // kommt. Auf dem Telefon nicht: 14 MB ungefragt zu laden waere unhoeflich,
-    // und das Poster zeigt ohnehin schon den Raum.
-    if (!telefon && 'IntersectionObserver' in window) {
+    // Der lange Film oben startet nur auf den Knopf, er ist 68 Sekunden und
+    // 35 MB schwer. Die kurzen Kapitelvideos laufen auf dem Rechner von selbst
+    // an, sobald ihr Block ins Bild kommt. Auf dem Telefon startet nichts von
+    // allein, dort zeigt das Standbild den Raum.
+    var kurz = block.closest('.video-block').classList.contains('klein');
+    if (kurz && !telefon && 'IntersectionObserver' in window) {
       var wache = new IntersectionObserver(function (eintraege) {
         eintraege.forEach(function (e) {
           if (e.isIntersecting) { starte(); wache.unobserve(e.target); }
