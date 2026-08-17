@@ -1,0 +1,29 @@
+# Haelt das Supabase-Projekt wach.
+#
+# Der kostenlose Tarif pausiert ein Projekt nach einer Woche ohne Aktivitaet.
+# Pausiert heisst: der Speicher antwortet nicht mehr, und auf der Seite fehlen
+# alle Bilder und Videos, bis jemand das Projekt im Dashboard wieder startet.
+# Diese Aktion ruft deshalb zweimal die Woche eine kleine Datei ab. Das kostet
+# ein paar Kilobyte und verhindert genau diesen Ausfall.
+#
+# Liegt im Repo unter .github/workflows/wachhalten.yml
+
+name: Supabase wachhalten
+
+on:
+  schedule:
+    # Montag und Donnerstag, 7:23 Uhr UTC. Krumme Minute mit Absicht, damit der
+    # Lauf nicht in der vollen Stunde mit allen anderen zusammen ansteht.
+    - cron: "23 7 * * 1,4"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kleine Datei aus dem Speicher abrufen
+        run: |
+          ZIEL="https://abjewbzxnkpryezoudmm.supabase.co/storage/v1/object/public/site/public/videos/hero-poster-s.webp"
+          CODE=$(curl -s -o /dev/null -w "%{http_code}" "$ZIEL")
+          echo "Antwort: $CODE"
+          test "$CODE" = "200"
